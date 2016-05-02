@@ -18,6 +18,9 @@
 			var EMPTY=0,
 				SNAKE=1,
 				FRUIT=2;
+			//Direções
+			var LEFT=0,UP=1,RIGHT=2,DOWN=3;
+			
 			//Grelha
 			var grid = {
 				width: undefined,
@@ -96,13 +99,48 @@
 				loop();
 			};
 			
-			function init() {};
+			function init() {
+				grid.init(EMPTY, COLS, ROWS);
+				
+				var sp = {x: Math.floor(COLS/2), y: ROWS-1};
+				snake.init(UP, sp.x, sp.y);
+				grid.set(SNAKE,sp.x,sp.y);
+				
+				setFood();
+			};
 			
-			function loop() {};
+			function loop() {
+				update();
+				draw();
+				
+				window.requestAnimationFrame(loop,canvas);
+			};
 			
-			function update() {};
+			function update() {
+				frames++;
+			};
 			
-			function draw() {};
+			function draw() {
+				var tw = canvas.width/grid.width;
+				var th = canvas.height/grid.height;
+				
+				for (var x=0; x < grid.width; x++){
+					for (var y=0; y < grid.height; y++){
+						switch (grid.get(x,y)) {
+							case EMPTY:
+								ctx.fillStyle = "#000";
+								break;
+							case SNAKE:
+								ctx.fillStyle = "#fff";
+								break;
+							case FRUIT:
+								ctx.fillStyle = "#f00";
+								break;
+						}
+						ctx.fillRect(x*tw,y*th,tw,th);
+					}
+				}
+			};
 			
 			main();
 			</script>
