@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Snake</title>
+		<meta charset="utf-8"/>
+	</head>
+	<body>
+		<script>
+			//função que devolve valores aleatórios entre a(inclusive) e b(exclusive)
+			function rnd(a,b) {
+				return Math.floor(Math.random()*(b-a)+a);
+			};
+			//Constantes
+			var COLS = 26,
+				ROWS = 26,
+				MULT = 20;
+			//Valores das Células
+			var EMPTY=0,
+				SNAKE=1,
+				FRUIT=2;
+			//Grelha
+			var grid = {
+				width: undefined,
+				height: undefined,
+				grid: undefined,
+				
+				init: function(d, columns, rows) {
+					this.width = columns;
+					this.height = rows;
+					this.grid = [];
+					for (var x=0; x < columns; x++){
+						this.grid.push([]);
+						for (var y=0; y < rows; y++){
+							this.grid[x].push(d);
+						};
+					};
+				},
+				
+				set: function(val, x, y) {
+					this.grid[x][y] = val;
+				},
+				
+				get: function(x,y){
+					return this.grid[x][y];
+				}
+			};
+			
+			var snake = {
+				direction: undefined,
+				queue: undefined,
+				last: undefined,
+				
+				init: function(d, x, y) {
+					this.direction = d;
+					this.queue = [];
+					this.insert(x,y);
+				},
+				
+				insert: function(x,y){
+					this.queue.unshift({x:x,y:y});
+					this.last = this.queue[0];
+				},
+				
+				remove: function(){
+					return this.queue.pop();
+				}
+			};
+			
+			function setFood() {
+				var empty = [];
+				for (var x=0; x < grid.width; x++){
+					for (var y=0; y < grid.width; y++){
+						if (grid.get(x,y) == EMPTY){
+							empty.push({x:x,y:y});
+						}
+					}
+				}
+				var randPos = empty[rnd(0,empty.length)];
+				grid.set(FRUIT, randPos.x, randPos.y);
+			};
+			
+			//Game Objects
+			var canvas, ctx, keystate, frames;
+			
+			function main() {
+				canvas = document.createElement("canvas");
+				canvas.width = COLS*MULT;
+				canvas.height = ROWS*MULT;
+				ctx = canvas.getContext("2d");
+				document.body.appendChild(canvas);
+				
+				frames = 0;
+				keystate = {};
+				
+				init();
+				loop();
+			};
+			
+			function init() {};
+			
+			function loop() {};
+			
+			function update() {};
+			
+			function draw() {};
+			
+			main();
+			</script>
+	</body>
+</html>
