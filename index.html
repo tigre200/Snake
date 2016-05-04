@@ -3,6 +3,18 @@
 	<head>
 		<title>Snake</title>
 		<meta charset="utf-8"/>
+		<style>
+			canvas {
+				display: block;
+				position: absolute;
+				border: 1px solid #000;
+				margin: auto;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+			}
+		</style>
 	</head>
 	<body>
 		<script>
@@ -20,6 +32,8 @@
 				FRUIT=2;
 			//Direções
 			var LEFT=0,UP=1,RIGHT=2,DOWN=3;
+			//Códigos das teclas
+			var KEY_LEFT=37, KEY_UP=38, KEY_RIGHT=39, KEY_DOWN=40;
 			
 			//Grelha
 			var grid = {
@@ -94,7 +108,13 @@
 				
 				frames = 0;
 				keystate = {};
-				
+				document.addEventListener("keydown", function(evt) {
+					keystate[evt.keyCode] = true;
+				});
+				document.addEventListener("keyup", function(evt) {
+					delete keystate[evt.keyCode];	
+				});
+										  
 				init();
 				loop();
 			};
@@ -118,6 +138,55 @@
 			
 			function update() {
 				frames++;
+				
+				if (keystate[KEY_LEFT])
+					snake.direction = LEFT;
+				if (keystate[KEY_UP])
+					snake.direction = UP;
+				if (keystate[KEY_DOWN])
+					snake.direction = DOWN;
+				if (keystate[KEY_RIGHT])
+					snake.direction = RIGHT;
+				
+				if (frames%5 == 0){
+					var nx = snake.last.x;
+					var ny = snake.last.y;
+					
+					switch (snake.direction){
+						case LEFT:
+							nx--;
+							break;
+						case UP:
+							ny--;
+							break;
+						case RIGHT:
+							nx++;
+							break;
+						case DOWN:
+							ny++;
+							break;
+					}
+					
+					if (0 > nx || nx > grid.width - 1 ||
+						0 > ny || ny > grid.height - 1){
+						return init();
+					}
+					
+					if (grid.get(nx,ny) == FRUIT) {
+						var tail = {x: nx, y: ny};
+						setFood();
+					}else{
+						var tail = snake.remove();
+						grid.set(EMPTY,tail.x,tail.y);
+						
+						tail.x = nx;
+						tail.y = ny;
+					}
+					
+					grid.set(SNAKE,tail.x,tail.y);
+					
+					snake.insert(tail.x, tail.y);
+				}
 			};
 			
 			function draw() {
