@@ -170,14 +170,7 @@
 							ny++;
 							break;
 					}
-					/*
-					if (0 > nx || nx > grid.width - 1 ||
-						0 > ny || ny > grid.height - 1 ||
-					   grid.get(nx,ny) == SNAKE){
-						return init();
-					}
-					*/
-										
+															
 					if ( nx < 0 ){
 						nx = grid.width - 1;
 					}else if (nx >= grid.width) {
