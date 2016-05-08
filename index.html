@@ -14,6 +14,18 @@
 				left: 0;
 				right: 0;
 			}
+			
+			p {
+				margin-left: 43.6%;
+				margin-top: 19.5%;
+				width: auto;
+				height: auto;
+				color: #0f0;
+				position: absolute;
+				display: flex;
+				font-size: 26px;
+				text-align: center;
+			}
 		</style>
 	</head>
 	<body>
@@ -97,7 +109,7 @@
 			};
 			
 			//Game Objects
-			var canvas, ctx, keystate, frames, score;
+			var canvas, ctx, keystate, frames, score, gameover;
 			
 			function main() {
 				canvas = document.createElement("canvas");
@@ -116,13 +128,16 @@
 				document.addEventListener("keyup", function(evt) {
 					delete keystate[evt.keyCode];	
 				});
-										  
+				
+				
 				init();
 				loop();
+				
 			};
 			
 			function init() {
 				score = 0;
+				gameover = false;
 				
 				grid.init(EMPTY, COLS, ROWS);
 				
@@ -137,7 +152,11 @@
 				update();
 				draw();
 				
-				window.requestAnimationFrame(loop,canvas);
+				if (!gameover){
+					window.requestAnimationFrame(loop,canvas);
+				}else{
+					end();
+				}
 			};
 			
 			function update() {
@@ -182,7 +201,7 @@
 					}
 							
 					if (grid.get(nx, ny) == SNAKE) {
-						return init();
+						gameover = true;
 					}
 					
 					if (grid.get(nx,ny) == FRUIT) {
@@ -226,6 +245,14 @@
 				ctx.fillStyle = "#0f0";
 				ctx.fillText("Score: " + score, 10, canvas.height - 10);
 			};
+			
+			function end() {
+				ctx.fillStyle = "#0f0";
+				
+				var text = document.createElement("p");
+				text.innerHTML = "Game Over<br/>Your score was: <br/>" + score;
+				document.body.appendChild(text);
+			}
 			
 			main();
 			</script>
