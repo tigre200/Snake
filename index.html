@@ -121,12 +121,25 @@
 				ctx.font = "20px Times";
 				
 				frames = 0;
-				keystate = {};
+				
+				keystate = [];
+				
+				keystate[KEY_RIGHT] = false;
+				keystate[KEY_LEFT] = false;
+				keystate[KEY_UP] = false;
+				keystate[KEY_DOWN] = false;
+				
 				document.addEventListener("keydown", function(evt) {
-					keystate[evt.keyCode] = true;
+					if (!keystate[KEY_LEFT]  &&
+						!keystate[KEY_RIGHT] &&
+						!keystate[KEY_UP]    &&
+						!keystate[KEY_DOWN])
+						{
+						keystate[evt.keyCode] = true;
+						}
 				});
 				document.addEventListener("keyup", function(evt) {
-					delete keystate[evt.keyCode];	
+					keystate[evt.keyCode] = false;	
 				});
 				
 				
