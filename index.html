@@ -130,6 +130,7 @@
 				keystate[KEY_DOWN] = false;
 				
 				document.addEventListener("keydown", function(evt) {
+					/*
 					if (!keystate[KEY_LEFT]  &&
 						!keystate[KEY_RIGHT] &&
 						!keystate[KEY_UP]    &&
@@ -137,6 +138,18 @@
 						{
 						keystate[evt.keyCode] = true;
 						}
+					*/
+					if (evt.keyCode === KEY_UP    ||
+						evt.keyCode === KEY_RIGHT ||
+						evt.keyCode === KEY_LEFT  ||
+						evt.keyCode === KEY_DOWN){
+							keystate[KEY_DOWN] = false;
+							keystate[KEY_LEFT] = false;
+							keystate[KEY_UP] = false;
+							keystate[KEY_RIGHT] = false;
+							
+							keystate[evt.keyCode] = true;
+					}
 				});
 				document.addEventListener("keyup", function(evt) {
 					keystate[evt.keyCode] = false;	
