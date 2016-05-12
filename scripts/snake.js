@@ -19,10 +19,6 @@ var KEY_LEFT=37,
 var score,
 //O jogo acabou?(true/false)
 	gameOver;
-//Função que devolve valores aleatórios entre a(inclusive) e b(exclusive)
-function rnd(a,b) {
-	return Math.floor(Math.random()*(b-a)+a);
-};
 //Objetos
 //Grelha
 var grid = {
