@@ -10,6 +10,11 @@ var LEFT=0,
 	UP=1,
 	RIGHT=2,
 	DOWN=3;
+//Códigos das teclas
+var KEY_LEFT=37,
+	KEY_UP=38,
+	KEY_RIGHT=39,
+	KEY_DOWN=40;
 //Pontuação
 var score,
 //O jogo acabou?(true/false)
@@ -93,7 +98,8 @@ var snake = {
 		queue: undefined,
 		//Cabeça da cobra
 		head: undefined,
-	
+		//Último segmento da cobra
+		tail: undefined	
 	//Métodos
 		/*Inicializa a cobra.
 			*Parâmetros:
@@ -109,15 +115,17 @@ var snake = {
 			*Parâmetros:
 				*x: posição horizontal;
 				*y: posição vertical.*/
-		insert: function(x,y){
+		insert: function (x,y) {
 			this.queue.unshift({x:x,y:y});
 			this.head = this.queue[0];
 			grid.set(SNAKE,x,y);
+			this.tail = this.queue[this.queue.length-1];
 		},
 		//Remove o último segmento da cobra, a cauda(tail).
-		remove: function () {
-			var tail = this.queue.pop();
-			grid.set(EMPTY,tail.x,tail.y);
+		remove: function () {	
+			grid.set(EMPTY,this.tail.x,this.tail.y);
+			this.queue.pop();
+			this.tail = this.queue[this.queue.length-1];
 		}
 };
 //Objeto que regista o estado das teclas que se consideram
@@ -134,6 +142,10 @@ var keyState = {
 			k === KEY_DOWN) {
 				this.key = k;
 		}
+	},
+	//Verifica se uma tecla é a premida
+	isKey: function (k) {
+		return (k === this.key);
 	}
 };
 //Função que inicializa os objetos para começar o jogo
@@ -149,4 +161,104 @@ function init() {
 	grid.setFood();
 }
 //Função que faz o update dos objetos a cada turno do jogo
-function update() {}
+function update() {
+	//Muda a direção da cobra de acordo com a tecla premida.
+	if 		(keyState.isKey(KEY_DOWN) &&
+		snake.direction !== UP)
+			snake.direction = DOWN;
+	else if (keyState.isKey(KEY_LEFT) &&
+		snake.direction !== RIGHT)
+			snake.direction = LEFT;
+	else if (keyState.isKey(KEY_RIGHT) &&
+		snake.direction !== LEFT)
+			snake.direction = RIGHT;
+	else if (keyState.isKey(KEY_UP) &&
+		snake.direction !== DOWN)
+			snake.direction = UP;
+	//Declara variáveis com as coordenadas da cabeça da cobra
+	var hx = snake.head.x,
+		hy = snake.head.y;
+	//Modifica as variáveis das coordenadas da cabeça de acordo com a direção da cobra.
+	switch (snake.direction) {
+		case LEFT:
+			hx--;
+			break;
+		case UP:
+			hy--;
+			break;
+		case RIGHT:
+			hx++;
+			break;
+		case DOWN:
+			hy++;
+			break;
+		default:
+			throw Error("Direção da cobra desconhecida.");
+	}
+	//Verifica se a cobra saíu da grelha
+	if (hx < 0) {
+		hx = grid.width - 1;
+	}else if (hx >= grid.width) {
+		hx = 0;
+	}else if (hy < 0) {
+		hy = grid.height - 1;
+	}else if (hy >= grid.height) {
+		hy = 0;
+	}
+	//Verifica se a cobra chocou consigo própria, terminando o jogo caso afirmativo.
+	if (grid.get(hx,hy) === SNAKE) {
+		gameOver = true;
+	}else {
+		//Verifica se a cobra comeu o fruto
+		if (grid.get(hx,hy) === FRUIT) {
+			score++;
+			grid.setFood();
+		}else {
+			//Remove a cauda da cobra
+			snake.remove();
+		}
+		//Coloca a nova cabeça na cobra, criando a ilusão de movimento
+		snake.insert(hx,hy);
+	}
+}
+//Função que desenha no canvas o jogo
+function drawCanvas(canvas /*canvas onde se desenha o jogo*/,
+			   ctx /*contexto do canvas para desenhar*/,
+			   emptyColor,
+			   snakeColor,
+			   fruitColor,
+			   scoreColor,
+			   scoreXPos,
+			   scoreYPos) {
+		//Largura da célula no canvas
+	var cellWidth = canvas.width/grid.width,
+		//Altura da célula no canvas
+		cellHeight = canvas.height/grid.height;
+	//Para cada célula desenha um retângulo com uma cor diferente dependente do seu valor
+	for (var x=0; x<grid.width; x++) {
+		for (var y=0; y<grid.height; y++) {
+			switch (grid.get(x,y)) {
+				case EMPTY:
+					ctx.fillStyle = emptyColor;
+					break;
+				case SNAKE:
+					ctx.fillStyle = snakeColor;
+					break;
+				case FRUIT:
+					ctx.fillStyle = fruitColor;
+					break;
+			}
+			ctx.fillRect(x*cellWidth, y*cellHeight,cellWidth,cellHeight);
+		}
+	}
+	//Desenha a pontuação no canto inferior esquerdo do canvas
+	ctx.fillStyle = scoreColor;
+	ctx.fillText("Score: " + score, scoreXPos, scoreYPos);
+}
+//Função que termina o jogo, mostrando a pontuação obtida
+function end(snakeScore) {
+	//Parágrafo que mostra a pontuação
+	var endp = document.createElement("p");
+	endp.innerHTML = "Game Over<br/>Your score is:<br/>" + snakeScore;
+	document.body.appendChild(endp);
+}
