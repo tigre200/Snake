@@ -14,6 +14,10 @@ var LEFT=0,
 var score,
 //O jogo acabou?(true/false)
 	gameOver;
+//Função que devolve valores aleatórios entre a(inclusive) e b(exclusive)
+function rnd(a,b) {
+	return Math.floor(Math.random()*(b-a)+a);
+};
 //Objetos
 //Grelha
 var grid = {
@@ -115,6 +119,22 @@ var snake = {
 			var tail = this.queue.pop();
 			grid.set(EMPTY,tail.x,tail.y);
 		}
+};
+//Objeto que regista o estado das teclas que se consideram
+var keyState = {
+	//Guarda o valor da última tecla premida
+	key: undefined,
+	/*Método quando se clica noutra tecla
+		*Parâmetros:
+			*k: valor da tecla clicada.*/
+	update: function (k) {
+		if (k === KEY_UP    ||
+			k === KEY_RIGHT ||
+			k === KEY_LEFT  ||
+			k === KEY_DOWN) {
+				this.key = k;
+		}
+	}
 };
 //Função que inicializa os objetos para começar o jogo
 function init() {
