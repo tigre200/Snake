@@ -122,24 +122,12 @@
 				
 				frames = 0;
 				
-				keystate = [];
-				
-				keystate[KEY_RIGHT] = false;
-				keystate[KEY_LEFT] = false;
-				keystate[KEY_UP] = false;
-				keystate[KEY_DOWN] = false;
-				
 				document.addEventListener("keydown", function(evt) {
 					if (evt.keyCode === KEY_UP    ||
 						evt.keyCode === KEY_RIGHT ||
 						evt.keyCode === KEY_LEFT  ||
 						evt.keyCode === KEY_DOWN){
-							keystate[KEY_DOWN] = false;
-							keystate[KEY_LEFT] = false;
-							keystate[KEY_UP] = false;
-							keystate[KEY_RIGHT] = false;
-							
-							keystate[evt.keyCode] = true;
+							keystate = evt.keyCode;
 					}
 				});
 				
@@ -153,6 +141,8 @@
 				gameover = false;
 				
 				grid.init(EMPTY, COLS, ROWS);
+				
+				keystate = KEY_UP;
 				
 				var sp = {x: Math.floor(COLS/2), y: ROWS-1};
 				snake.init(UP, sp.x, sp.y);
@@ -176,13 +166,13 @@
 				frames++;
 				
 				if (frames%5 == 0){
-					if (keystate[KEY_LEFT] && snake.direction != RIGHT)
+					if (keystate === KEY_LEFT && snake.direction != RIGHT)
 						snake.direction = LEFT;
-					if (keystate[KEY_UP] && snake.direction != DOWN)
+					if (keystate === KEY_UP && snake.direction != DOWN)
 						snake.direction = UP;
-					if (keystate[KEY_DOWN] && snake.direction != UP)
+					if (keystate === KEY_DOWN && snake.direction != UP)
 						snake.direction = DOWN;
-					if (keystate[KEY_RIGHT] && snake.direction != LEFT)
+					if (keystate === KEY_RIGHT && snake.direction != LEFT)
 						snake.direction = RIGHT;
 					
 					var nx = snake.last.x;
