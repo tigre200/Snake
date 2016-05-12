@@ -1,3 +1,4 @@
+	//Lógica do jogo
 //Número de colunas e filas da grelha
 var COLUMNS=25,
 	ROWS=25;
@@ -19,6 +20,14 @@ var KEY_LEFT=37,
 var score,
 //O jogo acabou?(true/false)
 	gameOver;
+//Canvas
+var canvas, ctx, frames;
+//Tempo que a cobra demora a percorrer uma célula
+var TIME=100;
+//Função que devolve valores aleatórios entre a(inclusive) e b(exclusive)
+function rnd(a,b) {
+	return Math.floor(Math.random()*(b-a)+a);
+};
 //Objetos
 //Grelha
 var grid = {
@@ -83,7 +92,6 @@ var grid = {
 			this.set(FRUIT, rndCell.x, rndCell.y);
 		}
 };
-
 //Cobra
 var snake = {
 	//Variáveis
@@ -95,7 +103,7 @@ var snake = {
 		//Cabeça da cobra
 		head: undefined,
 		//Último segmento da cobra
-		tail: undefined	
+		tail: undefined,
 	//Métodos
 		/*Inicializa a cobra.
 			*Parâmetros:
@@ -147,6 +155,7 @@ var keyState = {
 //Função que inicializa os objetos para começar o jogo
 function start() {
 	score = 0;
+	frames = 0;
 	gameOver = false;
 	grid.init(EMPTY, COLUMNS, ROWS);
 	var initPos = {
@@ -217,3 +226,67 @@ function update() {
 		snake.insert(hx,hy);
 	}
 }
+
+	//Funções de desenho do jogo no canvas
+//Função que desenha no canvas o jogo
+function drawCanvas(emptyColor,snakeColor,fruitColor,scoreColor,scoreXPos,scoreYPos) {
+		//Largura da célula no canvas
+	var cellWidth = canvas.width/grid.width,
+		//Altura da célula no canvas
+		cellHeight = canvas.height/grid.height;
+	//Para cada célula desenha um retângulo com uma cor diferente dependente do seu valor
+	for (var x=0; x<grid.width; x++) {
+		for (var y=0; y<grid.height; y++) {
+			switch (grid.get(x,y)) {
+				case EMPTY:
+					ctx.fillStyle = emptyColor;
+					break;
+				case SNAKE:
+					ctx.fillStyle = snakeColor;
+					break;
+				case FRUIT:
+					ctx.fillStyle = fruitColor;
+					break;
+			}
+			ctx.fillRect(x*cellWidth, y*cellHeight,cellWidth,cellHeight);
+		}
+	}
+	//Desenha a pontuação no canto inferior esquerdo do canvas
+	ctx.fillStyle = scoreColor;
+	ctx.fillText("Score: " + score, scoreXPos, scoreYPos);
+}
+//Função que termina o jogo, mostrando a pontuação obtida
+function end() {
+	//Parágrafo que mostra a pontuação
+	var endp = document.createElement("p");
+	endp.id = "gameOver";
+	endp.innerHTML = "Game Over<br/>Your score is:<br/>" + score;
+	document.body.appendChild(endp);
+}
+	//Funções que iniciam o jogo
+function loop() {
+	frames++;
+	if (frames%5 === 0) {
+		update();
+		drawCanvas("#000","#00f","#f00","#0f0",canvas.width*1/100,canvas.height*(1-1/100));
+	}
+	
+	while (!gameOver){	
+		window.requestAnimationFrame(loop);
+	}
+	end(score);
+}
+function main () {
+	canvas = document.createElement("canvas");
+	canvas.id = "snakeCanvas";
+	ctx = canvas.getContext("2d");
+	ctx.font = "20px Times";
+	document.body.appendChild(canvas);
+	
+	document.addEventListener("keydown",keyState.update);
+	
+	start();
+	loop();
+}
+
+main();
