@@ -14,18 +14,40 @@
 				left: 0;
 				right: 0;
 			}
-			
-			p {
-				margin-left: 43.6%;
-				margin-top: 19.5%;
-				width: auto;
-				height: auto;
+            
+            div#end {
+                margin-left: 40.6%;
+				margin-top: 16.5%;
+				width: 40%;
+                height: 70%;
 				color: #0f0;
 				position: absolute;
 				display: flex;
 				font-size: 26px;
 				text-align: center;
-			}
+            }
+			
+            #endgametext {
+                display: block;
+                clear: both;
+                height: 30%;
+            }
+            
+            #restart {
+                margin-top: 31.147%;
+                margin-left: -31.273%;
+                margin-bottom: 30%;
+				width: 14%;
+				height: 0.000005%;
+				color: #e70;
+				font-size: 24px;
+				text-align: center;
+                display: block;
+            }
+            
+            #restart h3 {
+                padding: 0.00000000000000000001%;
+            }
 		</style>
 	</head>
 	<body>
@@ -118,10 +140,6 @@
 				ctx = canvas.getContext("2d");
 				document.body.appendChild(canvas);
 				
-				ctx.font = "20px Times";
-				
-				frames = 0;
-				
 				document.addEventListener("keydown", function(evt) {
 					if (evt.keyCode === KEY_UP    ||
 						evt.keyCode === KEY_RIGHT ||
@@ -132,12 +150,12 @@
 				});
 				
 				init();
-				loop();
-				
 			};
 			
 			function init() {
-				score = 0;
+				
+                score = 0;
+                frames = 0;
 				gameover = false;
 				
 				grid.init(EMPTY, COLS, ROWS);
@@ -149,6 +167,8 @@
 				grid.set(SNAKE,sp.x,sp.y);
 				
 				setFood();
+                
+                loop();
 			};
 			
 			function loop() {
@@ -245,17 +265,40 @@
 						ctx.fillRect(x*tw,y*th,tw,th);
 					}
 				}
+                ctx.font = "20px Times";
 				ctx.fillStyle = "#0f0";
 				ctx.fillText("Score: " + score, 10, canvas.height - 10);
 			};
 			
 			function end() {
 				ctx.fillStyle = "#0f0";
+                
+                var endDiv = document.createElement("div");
+                endDiv.id = "end";
 				
-				var text = document.createElement("p");
+				var text = document.createElement("h2");
+                text.id = "endgametext";
 				text.innerHTML = "Game Over<br/>Your score was: <br/>" + score;
-				document.body.appendChild(text);
+                endDiv.appendChild(text);
+                
+                var btnRestart = document.createElement("div");
+                btnRestart.id = "restart";
+                endDiv.appendChild(btnRestart);
+                
+                var hRestart = document.createElement("h3");
+                hRestart.innerHTML = "Retry";
+                btnRestart.appendChild(hRestart);
+                
+                btnRestart.addEventListener("click", function () {restart(endDiv) ;});
+                
+                document.body.appendChild(endDiv);
 			}
+            
+            function restart (end) {
+                end.parentNode.removeChild(end);
+                
+                init();
+            }
 			
 			main();
 			</script>
