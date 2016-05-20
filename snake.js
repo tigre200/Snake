@@ -77,7 +77,7 @@ function setFood() {
 }
 
 //Game Objects
-var canvas, ctx, keystate, frames, score, gameover, scores = [];
+var canvas, ctx, keystate, frames, score, gameover;
 
 function main() {
     canvas = document.createElement("canvas");
@@ -85,6 +85,8 @@ function main() {
     canvas.height = ROWS*MULT;
     ctx = canvas.getContext("2d");
     document.body.appendChild(canvas);
+    
+    createHighScore(null);
     
     document.addEventListener("keydown", function(evt) {
         if (evt.keyCode === KEY_UP    ||
@@ -235,17 +237,28 @@ function end() {
     hRestart.innerHTML = "Retry";
     btnRestart.appendChild(hRestart);
     
-    btnRestart.addEventListener("click", function () {restart(endDiv) ;});
-    
     document.body.appendChild(endDiv);
     
-    scores.push(score);
-    scores.sort(function (a, b) {return (b-a)});
+    createHighScore(score);
     
-    createHighScore(scores);
+    btnRestart.addEventListener("click", function () {restart(endDiv) ;});
 }
 
-function createHighScore (highscores) {
+function createHighScore (highscore) {
+    var scores = [];
+    
+    for(var i=0; i<10; i++){
+       if(window.localStorage.getItem("highscore"+(i+1)) === null){
+           if(highscore !== null){
+               scores.push(highscore);           
+           }
+           break;
+       }else{
+           scores.push(Number(window.localStorage.getItem("highscore"+(i+1))));
+       }
+    }
+    scores.sort(function (a, b) {return (b-a)});
+    
     var everyThing = document.getElementById("highscore");
     if (everyThing != null) {
         everyThing.removeChild(everyThing.lastChild);
@@ -261,9 +274,10 @@ function createHighScore (highscores) {
     var list = document.createElement("ol");
     everyThing.appendChild(list);
     
-    for (var i=0; i<highscores.length; i++) {
+    for(var i=0; i<scores.length; i++){
         var li = document.createElement("li");
-        li.innerHTML = highscores[i];
+        li.innerHTML = scores[i];
+        window.localStorage.setItem("highscore"+(i+1),scores[i]);
         
         list.appendChild(li);
     }
