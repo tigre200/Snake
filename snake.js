@@ -249,13 +249,13 @@ function createHighScore (highscore) {
     
     for(var i=0; i<10; i++){
        if(window.localStorage.getItem("highscore"+(i+1)) === null){
-           if(highscore !== null){
-               scores.push(highscore);           
-           }
            break;
        }else{
            scores.push(Number(window.localStorage.getItem("highscore"+(i+1))));
        }
+    }
+    if(highscore !== null){
+        scores.push(highscore);
     }
     scores.sort(function (a, b) {return (b-a)});
     
@@ -274,7 +274,7 @@ function createHighScore (highscore) {
     var list = document.createElement("ol");
     everyThing.appendChild(list);
     
-    for(var i=0; i<scores.length; i++){
+    for(var i=0; i<10; i++){
         var li = document.createElement("li");
         li.innerHTML = scores[i];
         window.localStorage.setItem("highscore"+(i+1),scores[i]);
