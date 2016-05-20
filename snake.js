@@ -97,7 +97,6 @@ function main() {
         }else if(evt.keyCode === R){
             init();
         }
-        }
     });
     
     init();
