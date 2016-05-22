@@ -95,7 +95,8 @@ function main() {
             evt.keyCode === KEY_DOWN){
                 keystate = evt.keyCode;
         }else if(evt.keyCode === R){
-            init();
+            gameover = true;
+            restart(document.getElementById("end"));
         }
     });
     
