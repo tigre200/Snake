@@ -3,8 +3,8 @@ function rnd(a, b) {
     return (Math.floor(Math.random() * (b - a) + a));
 }
 //Constantes
-var COLS = 26,
-    ROWS = 26,
+var COLS = 25,
+    ROWS = 25,
     MULT = 20;
 //Valores das Células
 var EMPTY=0,
@@ -101,7 +101,7 @@ function main() {
 }
 
 function init() {
-    
+	
     score = 0;
     frames = 0;
     gameover = false;
@@ -113,6 +113,8 @@ function init() {
     var sp = {x: Math.floor(COLS/2), y: ROWS-1};
     snake.init(UP, sp.x, sp.y);
     grid.set(SNAKE,sp.x,sp.y);
+	
+	ctx = document.getElementById("snake").getContext("2d");
     
     setFood();
     
@@ -126,7 +128,7 @@ function loop() {
     if (!gameover){
         window.requestAnimationFrame(loop,canvas);
     }else{
-        end();
+        gameOverDisplay(score);
     }
 }
 
@@ -244,51 +246,8 @@ function end() {
     btnRestart.addEventListener("click", function () {restart(endDiv) ;});
 }
 
-function createHighScore (highscore) {
-    var scores = [];
-    
-    for(var i=0; i<10; i++){
-       if(window.localStorage.getItem("highscore"+(i+1)) === null){
-           break;
-       }else{
-           scores.push(Number(window.localStorage.getItem("highscore"+(i+1))));
-       }
-    }
-    if(highscore !== null){
-        scores.push(highscore);
-    }
-    scores.sort(function (a, b) {return (b-a)});
-    
-    var everyThing = document.getElementById("highscore");
-    if (everyThing != null) {
-        everyThing.removeChild(everyThing.lastChild);
-    }else {
-        everyThing = document.createElement("div");
-        everyThing.id = "highscore";
-        
-        var title = document.createElement("h2");
-        title.innerHTML = "High Scores";
-        everyThing.appendChild(title);
-    }
-        
-    var list = document.createElement("ol");
-    everyThing.appendChild(list);
-    
-    for(var i=0; i<10; i++){
-        var li = document.createElement("li");
-        li.innerHTML = scores[i];
-        window.localStorage.setItem("highscore"+(i+1),scores[i]);
-        
-        list.appendChild(li);
-    }
-    
-    document.body.appendChild(everyThing);
-}
-
 function restart (end) {
     end.parentNode.removeChild(end);
     
     init();
 }
-
-main();
