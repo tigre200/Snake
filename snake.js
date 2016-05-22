@@ -13,7 +13,7 @@ var EMPTY=0,
 //Direções
 var LEFT=0,UP=1,RIGHT=2,DOWN=3;
 //Códigos das teclas
-var KEY_LEFT=37, KEY_UP=38, KEY_RIGHT=39, KEY_DOWN=40;
+var KEY_LEFT=37, KEY_UP=38, KEY_RIGHT=39, KEY_DOWN=40, R=82;
 
 //Grelha
 var grid = {
@@ -94,6 +94,9 @@ function main() {
             evt.keyCode === KEY_LEFT  ||
             evt.keyCode === KEY_DOWN){
                 keystate = evt.keyCode;
+        }else if(evt.keyCode === R){
+            gameover = true;
+            restart(document.getElementById("end"));
         }
     });
     
