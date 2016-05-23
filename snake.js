@@ -4,8 +4,7 @@ function rnd(a, b) {
 }
 //Constantes
 var COLS = 25,
-    ROWS = 25,
-    MULT = 20;
+    ROWS = 25;
 //Valores das Células
 var EMPTY=0,
     SNAKE=1,
@@ -80,13 +79,10 @@ function setFood() {
 var canvas, ctx, keystate, frames, score, gameover;
 
 function main() {
-    canvas = document.createElement("canvas");
-    canvas.width = COLS*MULT;
-    canvas.height = ROWS*MULT;
+    canvas = document.getElementById("snake");
     ctx = canvas.getContext("2d");
-    document.body.appendChild(canvas);
     
-    createHighScore(null);
+    //createHighScore(null);
     
     document.addEventListener("keydown", function(evt) {
         if (evt.keyCode === KEY_UP    ||
@@ -101,7 +97,7 @@ function main() {
 }
 
 function init() {
-	
+    
     score = 0;
     frames = 0;
     gameover = false;
@@ -113,8 +109,6 @@ function init() {
     var sp = {x: Math.floor(COLS/2), y: ROWS-1};
     snake.init(UP, sp.x, sp.y);
     grid.set(SNAKE,sp.x,sp.y);
-	
-	ctx = document.getElementById("snake").getContext("2d");
     
     setFood();
     
@@ -128,7 +122,7 @@ function loop() {
     if (!gameover){
         window.requestAnimationFrame(loop,canvas);
     }else{
-        gameOverDisplay(score);
+        end();
     }
 }
 
@@ -241,13 +235,78 @@ function end() {
     
     document.body.appendChild(endDiv);
     
-    createHighScore(score);
+    saveHighScore(score);
     
     btnRestart.addEventListener("click", function () {restart(endDiv) ;});
 }
+/*
+function createHighScore (highscore) {
+    var scores = [];
+    
+    for(var i=0; i<10; i++){
+       if(window.localStorage.getItem("highscore"+(i+1)) === null){
+           break;
+       }else{
+           scores.push(Number(window.localStorage.getItem("highscore"+(i+1))));
+       }
+    }
+    if(highscore !== null){
+        scores.push(highscore);
+    }
+    scores.sort(function (a, b) {return (b-a)});
+    
+    var everyThing = document.getElementById("highscore");
+    if (everyThing != null) {
+        everyThing.removeChild(everyThing.lastChild);
+    }else {
+        everyThing = document.createElement("div");
+        everyThing.id = "highscore";
+        
+        var title = document.createElement("h2");
+        title.innerHTML = "High Scores";
+        everyThing.appendChild(title);
+    }
+        
+    var list = document.createElement("ol");
+    everyThing.appendChild(list);
+    
+    for(var i=0; i<10; i++){
+        var li = document.createElement("li");
+        li.innerHTML = scores[i];
+        window.localStorage.setItem("highscore"+(i+1),scores[i]);
+        
+        list.appendChild(li);
+    }
+    
+    document.body.appendChild(everyThing);
+}
+*/
+function saveHighScore(highScore){
+    var highscores = getHighScores();
+    highscores.push(highScore);
+    highscores.sort(function(a,b){return b-a;});
+    for(var i=0;i<10;i++){
+        window.localStorage["score"+i] = highscores[i];
+    }
+}
+function getHighScores(){
+    var scores = [];
+    for(var i=0;i<10;i++){
+        var item = window.localStorage.getItem("score"+i);
+        if (item != "NaN" && item != "null" && item != "undefined" && item != "") {
+            scores.push(parseInt(item));
+        }else{
+            scores.push(-1);
+        }
+    }
+    return scores;
+}
+function displayHighScores(){}
 
 function restart (end) {
     end.parentNode.removeChild(end);
     
     init();
 }
+
+main();
