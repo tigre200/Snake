@@ -82,7 +82,7 @@ function main() {
     canvas = document.getElementById("snake");
     ctx = canvas.getContext("2d");
     
-    //createHighScore(null);
+    displayHighScores();
     
     document.addEventListener("keydown", function(evt) {
         if (evt.keyCode === KEY_UP    ||
@@ -236,6 +236,7 @@ function end() {
     document.body.appendChild(endDiv);
     
     saveHighScore(score);
+	displayHighScores();
     
     btnRestart.addEventListener("click", function () {restart(endDiv) ;});
 }
@@ -293,15 +294,54 @@ function getHighScores(){
     var scores = [];
     for(var i=0;i<10;i++){
         var item = window.localStorage.getItem("score"+i);
-        if (item != "NaN" && item != "null" && item != "undefined" && item != "") {
+        if (!hasStrangeValues(item)) {
             scores.push(parseInt(item));
         }else{
             scores.push(-1);
+			window.localStorage.setItem("score"+i,-1);
         }
     }
     return scores;
 }
-function displayHighScores(){}
+function displayHighScores(){
+	var highscores = getHighScores();
+	var div = document.getElementById("highscore");
+	if (div == null)
+	{
+		div = createElement(document.body,"div","highscore");
+		var title = createElement(div,"h2",null,"High Scores");
+	}
+	else
+		div.removeChild(div.lastChild);
+	
+	var highscoresList = createElement(div,"ol");
+	for (var i = 0; i < highscores.length; i++)
+		{
+			var s = highscores[i];
+			if(s!=-1)
+				createElement(highscoresList,"li",null,s.toString());
+		}
+}
+
+function createElement(parent, element, id, text){
+	var node = document.createElement(element);
+	if(!hasStrangeValues(id))
+		node.id = id;
+	if(!hasStrangeValues(text))
+		node.innerHTML = text;
+	parent.appendChild(node);
+	return node;
+}
+
+function hasStrangeValues(variable){
+	return (variable == null ||
+			variable == undefined ||
+			variable == NaN ||
+			variable == "null" ||
+			variable == "undefined" ||
+			variable == "NaN" ||
+			variable.length == 0);
+}
 
 function restart (end) {
     end.parentNode.removeChild(end);
