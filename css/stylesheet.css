@@ -1,5 +1,5 @@
 canvas {
-    display: block;
+    display: inline-block;
     position: absolute;
     border: 1px solid #000;
     margin: auto;
@@ -12,7 +12,7 @@ canvas {
 div#end {
     margin: auto;
 	margin-left: 35%;
-	margin-top: -8%;
+	margin-top: 13%;
 	padding: 0%;
     width: 30%;
     height: 45%;
@@ -39,7 +39,7 @@ div#end {
 }
 
 #restart h3 {
-	margin-top: 0%;
+	margin-top: -8%;
 	padding: 0;
 	clear: both;
 	position: relative;
@@ -55,4 +55,33 @@ h1#title {
     text-align: center;
     font-size: 60px;
     color: green;
+}
+
+div#highscore {
+	display: inline-block;
+	width: 20%;
+	height: 50%;
+	margin-left: 75%;
+	border: 2px solid blue;
+	text-align: center;
+}
+
+div#highscore h2 {
+	font-size: 28px;
+	width: 80%;
+	margin: auto;
+	margin-top: 5%;
+	color: yellowgreen;
+}
+
+div#highscore ol {
+	margin: auto;
+	margin-left: 32%;
+	width: 6%;
+}
+
+div#highscore ol li {
+	position: relative;
+	text-align: right;
+	list-style-type: none;
 }
