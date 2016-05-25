@@ -93,6 +93,11 @@ function main() {
         }
     });
     
+	$("#snake").on("swipeup",function(){keystate=KEY_UP;});
+	$("#snake").on("swipedown",function(){keystate=KEY_DOWN;});
+	$("#snake").on("swipeleft",function(){keystate=KEY_LEFT;});
+	$("#snake").on("swiperight",function(){keystate=KEY_RIGHT;});
+	
     init();
 }
 
