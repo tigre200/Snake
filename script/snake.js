@@ -241,48 +241,7 @@ function end() {
     btnRestart.addEventListener("click", function () {restart(endDiv) ;});
 	btnRestart.addEventListener("touchend",function(){restart(endDiv);});
 }
-/*
-function createHighScore (highscore) {
-    var scores = [];
-    
-    for(var i=0; i<10; i++){
-       if(window.localStorage.getItem("highscore"+(i+1)) === null){
-           break;
-       }else{
-           scores.push(Number(window.localStorage.getItem("highscore"+(i+1))));
-       }
-    }
-    if(highscore !== null){
-        scores.push(highscore);
-    }
-    scores.sort(function (a, b) {return (b-a)});
-    
-    var everyThing = document.getElementById("highscore");
-    if (everyThing != null) {
-        everyThing.removeChild(everyThing.lastChild);
-    }else {
-        everyThing = document.createElement("div");
-        everyThing.id = "highscore";
-        
-        var title = document.createElement("h2");
-        title.innerHTML = "High Scores";
-        everyThing.appendChild(title);
-    }
-        
-    var list = document.createElement("ol");
-    everyThing.appendChild(list);
-    
-    for(var i=0; i<10; i++){
-        var li = document.createElement("li");
-        li.innerHTML = scores[i];
-        window.localStorage.setItem("highscore"+(i+1),scores[i]);
-        
-        list.appendChild(li);
-    }
-    
-    document.body.appendChild(everyThing);
-}
-*/
+
 function saveHighScore(highScore){
     var highscores = getHighScores();
     highscores.push(highScore);
