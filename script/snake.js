@@ -239,6 +239,7 @@ function end() {
 	displayHighScores();
     
     btnRestart.addEventListener("click", function () {restart(endDiv) ;});
+	btnRestart.addEventListener("touchend",function(){restart(endDiv);});
 }
 /*
 function createHighScore (highscore) {
