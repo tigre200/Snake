@@ -316,11 +316,11 @@ function displayHighScores(){
 	
 	var highscoresList = createElement(div,"ol");
 	for (var i = 0; i < highscores.length; i++)
-		{
-			var s = highscores[i];
-			if(s!=-1)
-				createElement(highscoresList,"li",null,s.toString());
-		}
+	{
+		var s = highscores[i];
+		if(s!=-1)
+			createElement(highscoresList,"li",null,s.toString());
+	}
 }
 
 function createElement(parent, element, id, text){
