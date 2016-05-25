@@ -312,7 +312,8 @@ function displayHighScores(){
 		var title = createElement(div,"h2",null,"High Scores");
 	}
 	else
-		div.removeChild(div.lastChild);
+		if (div.lastChild.nodeName.toLowerCase() == "ol")
+			div.removeChild(div.lastChild);
 	
 	var highscoresList = createElement(div,"ol");
 	for (var i = 0; i < highscores.length; i++)
