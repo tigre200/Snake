@@ -1,0 +1,53 @@
+canvas {
+    display: block;
+    position: absolute;
+    border: 1px solid #000;
+    margin: auto;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+            
+div#end {
+    margin-left: 40.6%;
+    margin-top: 16.5%;
+    width: 40%;
+    height: 70%;
+    color: #0f0;
+    position: absolute;
+    display: flex;
+    font-size: 26px;
+    text-align: center;
+}
+
+#endgametext {
+    display: block;
+    clear: both;
+    height: 30%;
+}
+
+#restart {
+    margin-top: 31.147%;
+    margin-left: -31.273%;
+    margin-bottom: 30%;
+    width: 14%;
+    height: 0.000005%;
+    color: #e70;
+    font-size: 24px;
+    text-align: center;
+    display: block;
+}
+
+#restart h3 {
+    padding: 0.00000000000000000001%;
+}
+
+h1#title {
+    width:20%;
+    margin: auto;
+    padding: 0%;
+    text-align: center;
+    font-size: 60px;
+    color: green;
+}

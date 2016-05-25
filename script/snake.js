@@ -3,9 +3,8 @@ function rnd(a, b) {
     return (Math.floor(Math.random() * (b - a) + a));
 }
 //Constantes
-var COLS = 26,
-    ROWS = 26,
-    MULT = 20;
+var COLS = 25,
+    ROWS = 25;
 //Valores das Células
 var EMPTY=0,
     SNAKE=1,
@@ -13,7 +12,7 @@ var EMPTY=0,
 //Direções
 var LEFT=0,UP=1,RIGHT=2,DOWN=3;
 //Códigos das teclas
-var KEY_LEFT=37, KEY_UP=38, KEY_RIGHT=39, KEY_DOWN=40, R=82;
+var KEY_LEFT=37, KEY_UP=38, KEY_RIGHT=39, KEY_DOWN=40;
 
 //Grelha
 var grid = {
@@ -80,13 +79,10 @@ function setFood() {
 var canvas, ctx, keystate, frames, score, gameover;
 
 function main() {
-    canvas = document.createElement("canvas");
-    canvas.width = COLS*MULT;
-    canvas.height = ROWS*MULT;
+    canvas = document.getElementById("snake");
     ctx = canvas.getContext("2d");
-    document.body.appendChild(canvas);
     
-    createHighScore(null);
+    displayHighScores();
     
     document.addEventListener("keydown", function(evt) {
         if (evt.keyCode === KEY_UP    ||
@@ -94,8 +90,6 @@ function main() {
             evt.keyCode === KEY_LEFT  ||
             evt.keyCode === KEY_DOWN){
                 keystate = evt.keyCode;
-        }else if(evt.keyCode === R){
-            init();
         }
     });
     
@@ -241,50 +235,71 @@ function end() {
     
     document.body.appendChild(endDiv);
     
-    createHighScore(score);
+    saveHighScore(score);
+	displayHighScores();
     
     btnRestart.addEventListener("click", function () {restart(endDiv) ;});
 }
 
-function createHighScore (highscore) {
+function saveHighScore(highScore){
+    var highscores = getHighScores();
+    highscores.push(highScore);
+    highscores.sort(function(a,b){return b-a;});
+    for(var i=0;i<10;i++){
+        window.localStorage["score"+i] = highscores[i];
+    }
+}
+function getHighScores(){
     var scores = [];
-    
-    for(var i=0; i<10; i++){
-       if(window.localStorage.getItem("highscore"+(i+1)) === null){
-           break;
-       }else{
-           scores.push(Number(window.localStorage.getItem("highscore"+(i+1))));
-       }
+    for(var i=0;i<10;i++){
+        var item = window.localStorage.getItem("score"+i);
+        if (!hasStrangeValues(item)) {
+            scores.push(parseInt(item));
+        }else{
+            scores.push(-1);
+			window.localStorage.setItem("score"+i,-1);
+        }
     }
-    if(highscore !== null){
-        scores.push(highscore);
-    }
-    scores.sort(function (a, b) {return (b-a)});
-    
-    var everyThing = document.getElementById("highscore");
-    if (everyThing != null) {
-        everyThing.removeChild(everyThing.lastChild);
-    }else {
-        everyThing = document.createElement("div");
-        everyThing.id = "highscore";
-        
-        var title = document.createElement("h2");
-        title.innerHTML = "High Scores";
-        everyThing.appendChild(title);
-    }
-        
-    var list = document.createElement("ol");
-    everyThing.appendChild(list);
-    
-    for(var i=0; i<10; i++){
-        var li = document.createElement("li");
-        li.innerHTML = scores[i];
-        window.localStorage.setItem("highscore"+(i+1),scores[i]);
-        
-        list.appendChild(li);
-    }
-    
-    document.body.appendChild(everyThing);
+    return scores;
+}
+function displayHighScores(){
+	var highscores = getHighScores();
+	var div = document.getElementById("highscore");
+	if (div == null)
+	{
+		div = createElement(document.body,"div","highscore");
+		var title = createElement(div,"h2",null,"High Scores");
+	}
+	else
+		div.removeChild(div.lastChild);
+	
+	var highscoresList = createElement(div,"ol");
+	for (var i = 0; i < highscores.length; i++)
+		{
+			var s = highscores[i];
+			if(s!=-1)
+				createElement(highscoresList,"li",null,s.toString());
+		}
+}
+
+function createElement(parent, element, id, text){
+	var node = document.createElement(element);
+	if(!hasStrangeValues(id))
+		node.id = id;
+	if(!hasStrangeValues(text))
+		node.innerHTML = text;
+	parent.appendChild(node);
+	return node;
+}
+
+function hasStrangeValues(variable){
+	return (variable == null ||
+			variable == undefined ||
+			variable == NaN ||
+			variable == "null" ||
+			variable == "undefined" ||
+			variable == "NaN" ||
+			variable.length == 0);
 }
 
 function restart (end) {
