@@ -12,20 +12,20 @@ const LEFT=0,UP=1,RIGHT=2,DOWN=3;
 const KEY_LEFT=37,KEY_UP=38,KEY_RIGHT=39,KEY_DOWN=40;
 
 //Grelha
-var grid;
+var grid, snake;
 //Construtor da grelha
-function grid(initialValue, numCols, numRows)
+function Grid(initialValue, numCols, numRows)
 {
-	var grid, width, height;
+	var board, width, height;
 	function init(d, columns, rows)
 	{
         width = columns;
         height = rows;
-        grid = [];
+        board = [];
         for (var x=0; x < columns; x++){
-            grid.push([]);
+            board.push([]);
             for (var y=0; y < rows; y++){
-                grid[x].push(d);
+                board[x].push(d);
             };
         };
     };
@@ -33,12 +33,12 @@ function grid(initialValue, numCols, numRows)
 	
 	this.set = function(value, x, y)
 	{
-		grid[x][y] = value;
+		board[x][y] = value;
 	}
 	
 	this.get = function(x,y)
 	{
-		return grid[x][y];
+		return board[x][y];
 	}
 	
 	this.getWidth = function()
@@ -51,7 +51,7 @@ function grid(initialValue, numCols, numRows)
 		return height;
 	}
 }
-
+/*
 var snake = {
     direction: undefined,
     queue: undefined,
@@ -72,6 +72,72 @@ var snake = {
         return this.queue.pop();
     }
 };
+*/
+function Snake(initialDirection, startX, startY)
+{
+	var direction, queue;
+	
+	this.insert = function(x,y)
+	{
+		queue.unshift({x:x,y:y});
+	};
+	
+	this.remove = function()
+	{
+		return queue.pop();
+	};
+	
+	this.getNumberOfSegments = function()
+	{
+		return queue.length;
+	};
+	
+	this.getSegment = function(segment)
+	{
+		if( (segment != NaN) && (segment>=0) && (segment<queue.length) )
+			return queue[segment];
+		else
+			switch(segment)
+			{
+				case "tail":
+				case "last":
+					return queue[this.getNumberOfSegments()-1];
+					break;
+				case "head":
+				case "first":
+					return queue[0];
+					break;
+				default:
+					throw "Can't find segment";
+			}
+	};
+	
+	this.getDirection = function()
+	{
+		return direction;
+	};
+	
+	this.setDirection = function(d)
+	{
+		switch(d)
+		{
+			case LEFT:
+			case UP:
+			case RIGHT:
+			case DOWN:
+				direction = d;
+				break;
+			default:
+				throw "Invalid direction";
+		}
+	};
+	
+	direction = initialDirection;
+	queue = [];
+	this.insert(startX,startY);
+	//testing
+	console.log(queue);
+}
 
 function setFood() {
     var empty = [];
@@ -117,13 +183,13 @@ function init() {
     score = 0;
     frames = 0;
     gameover = false;
-    
-    grid = new grid(EMPTY, COLS, ROWS);
+	
+    grid = new Grid(EMPTY, COLS, ROWS);
     
     keystate = KEY_UP;
     
     var sp = {x: Math.floor(COLS/2), y: ROWS-1};
-    snake.init(UP, sp.x, sp.y);
+    snake = new Snake(UP, sp.x, sp.y);
     grid.set(SNAKE,sp.x,sp.y);
     
     setFood();
@@ -146,19 +212,19 @@ function update() {
     frames++;
     
     if (frames%5 == 0){
-        if (keystate === KEY_LEFT && snake.direction != RIGHT)
-            snake.direction = LEFT;
-        if (keystate === KEY_UP && snake.direction != DOWN)
-            snake.direction = UP;
-        if (keystate === KEY_DOWN && snake.direction != UP)
-            snake.direction = DOWN;
-        if (keystate === KEY_RIGHT && snake.direction != LEFT)
-            snake.direction = RIGHT;
+        if (keystate === KEY_LEFT && snake.getDirection() != RIGHT)
+            snake.setDirection(LEFT);
+        if (keystate === KEY_UP && snake.getDirection() != DOWN)
+            snake.setDirection(UP);
+        if (keystate === KEY_DOWN && snake.getDirection() != UP)
+            snake.setDirection(DOWN);
+        if (keystate === KEY_RIGHT && snake.getDirection() != LEFT)
+            snake.setDirection(RIGHT);
         
-        var nx = snake.last.x;
-        var ny = snake.last.y;
+        var nx = snake.getSegment("head").x;
+        var ny = snake.getSegment("head").y;
         
-        switch (snake.direction){
+        switch (snake.getDirection()){
             case LEFT:
                 nx--;
                 break;
@@ -171,6 +237,8 @@ function update() {
             case DOWN:
                 ny++;
                 break;
+			default:
+				throw "Don't know this direction";
         }
                                                 
         if ( nx < 0 ){
@@ -183,25 +251,28 @@ function update() {
             ny = 0;
         }
                 
-        if (grid.get(nx, ny) == SNAKE) {
+        if (grid.get(nx, ny) == SNAKE)
+		{
             gameover = true;
-        }
+		}
+        else
+		{
+        	if (grid.get(nx,ny) == FRUIT)
+			{
+            	score++;
+            	setFood();
+        	}
+			else
+			{
+            	var tail = snake.remove();
+            	grid.set(EMPTY,tail.x,tail.y);
+			}
+			
+			grid.set(SNAKE,nx,ny);
+        	snake.insert(nx, ny);
+		}
+		
         
-        if (grid.get(nx,ny) == FRUIT) {
-            score++;
-            var tail = {x: nx, y: ny};
-            setFood();
-        }else{
-            var tail = snake.remove();
-            grid.set(EMPTY,tail.x,tail.y);
-            
-            tail.x = nx;
-            tail.y = ny;
-        }
-        
-        grid.set(SNAKE,tail.x,tail.y);
-        
-        snake.insert(tail.x, tail.y);
     }
 }
 
