@@ -254,25 +254,25 @@ function init() {
     loop();
 }
 
-function loop() {
-    update();
-    draw();
-    
-    if (!gameover){
-        window.requestAnimationFrame(loop,canvas);
-    }else{
-        end();
-    }
+function loop()
+{
+    if (frames%5 == 0){
+		update();
+    	draw();
+		if(gameover)
+		{
+			end();
+			return;
+		}
+	}
+	frames++;
+   	window.requestAnimationFrame(loop,canvas);
 }
 
-function update() {
-    frames++;
-    
-    if (frames%5 == 0){
-		snake.updateDirection(keystate);
-		
-        gameover = snake.move();
-    }
+function update()
+{
+    snake.updateDirection(keystate);
+	gameover = snake.move();
 }
 
 function draw() {
