@@ -3,43 +3,54 @@ function rnd(a, b) {
     return (Math.floor(Math.random() * (b - a) + a));
 }
 //Constantes
-var COLS = 25,
-    ROWS = 25;
+const COLS = 25,ROWS = 25;
 //Valores das Células
-var EMPTY=0,
-    SNAKE=1,
-    FRUIT=2;
+const EMPTY=0,SNAKE=1,FRUIT=2;
 //Direções
-var LEFT=0,UP=1,RIGHT=2,DOWN=3;
+const LEFT=0,UP=1,RIGHT=2,DOWN=3;
 //Códigos das teclas
-var KEY_LEFT=37, KEY_UP=38, KEY_RIGHT=39, KEY_DOWN=40;
+const KEY_LEFT=37,KEY_UP=38,KEY_RIGHT=39,KEY_DOWN=40;
 
 //Grelha
-var grid = {
-    width: undefined,
-    height: undefined,
-    grid: undefined,
-    
-    init: function(d, columns, rows) {
-        this.width = columns;
-        this.height = rows;
-        this.grid = [];
+var grid;
+//Construtor da grelha
+function grid(initialValue, numCols, numRows)
+{
+	var grid, width, height;
+	function init(d, columns, rows)
+	{
+        width = columns;
+        height = rows;
+        grid = [];
         for (var x=0; x < columns; x++){
-            this.grid.push([]);
+            grid.push([]);
             for (var y=0; y < rows; y++){
-                this.grid[x].push(d);
+                grid[x].push(d);
             };
         };
-    },
-    
-    set: function(val, x, y) {
-        this.grid[x][y] = val;
-    },
-    
-    get: function(x,y){
-        return this.grid[x][y];
-    }
-};
+    };
+	init(initialValue,numCols,numRows);
+	
+	this.set = function(value, x, y)
+	{
+		grid[x][y] = value;
+	}
+	
+	this.get = function(x,y)
+	{
+		return grid[x][y];
+	}
+	
+	this.getWidth = function()
+	{
+		return width;
+	}
+	
+	this.getHeight = function()
+	{
+		return height;
+	}
+}
 
 var snake = {
     direction: undefined,
@@ -64,8 +75,8 @@ var snake = {
 
 function setFood() {
     var empty = [];
-    for (var x=0; x < grid.width; x++){
-        for (var y=0; y < grid.width; y++){
+    for (var x=0; x < grid.getWidth(); x++){
+        for (var y=0; y < grid.getHeight(); y++){
             if (grid.get(x,y) == EMPTY){
                 empty.push({x:x,y:y});
             }
@@ -107,7 +118,7 @@ function init() {
     frames = 0;
     gameover = false;
     
-    grid.init(EMPTY, COLS, ROWS);
+    grid = new grid(EMPTY, COLS, ROWS);
     
     keystate = KEY_UP;
     
@@ -163,12 +174,12 @@ function update() {
         }
                                                 
         if ( nx < 0 ){
-            nx = grid.width - 1;
-        }else if (nx >= grid.width) {
+            nx = grid.getWidth() - 1;
+        }else if (nx >= grid.getWidth()) {
             nx = 0;
         }else if (ny < 0) {
-            ny = grid.height - 1;
-        }else if (ny >= grid.height) {
+            ny = grid.getHeight() - 1;
+        }else if (ny >= grid.getHeight()) {
             ny = 0;
         }
                 
@@ -195,11 +206,11 @@ function update() {
 }
 
 function draw() {
-    var tw = canvas.width/grid.width;
-    var th = canvas.height/grid.height;
+    var tw = canvas.width/grid.getWidth();
+    var th = canvas.height/grid.getHeight();
     
-    for (var x=0; x < grid.width; x++){
-        for (var y=0; y < grid.height; y++){
+    for (var x=0; x < grid.getWidth(); x++){
+        for (var y=0; y < grid.getHeight(); y++){
             switch (grid.get(x,y)) {
                 case EMPTY:
                     ctx.fillStyle = "#000";
