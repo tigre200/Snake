@@ -52,7 +52,7 @@ function Grid(initialValue, numCols, numRows)
 	}
 }
 
-function Snake(initialDirection, startX, startY)
+function Snake(initialDirection, startX, startY, grid)
 {
 	var direction = initialDirection, queue = [], gameOver = false;
 	
@@ -126,7 +126,7 @@ function Snake(initialDirection, startX, startY)
             			direction = RIGHT;
 	};
 	
-	this.move = function()
+	this.move = function(scoreFunction)
 	{
 		var nx = this.getSegment("head").x,
 			ny = this.getSegment("head").y;
@@ -170,14 +170,13 @@ function Snake(initialDirection, startX, startY)
 		switch(grid.get(nx, ny))
 		{
 			case SNAKE:
-            	gameOver = true;
-				return gameOver;
+            	return true;
 				break;
 			default:
 				switch(grid.get(nx,ny))
 				{
 					case FRUIT:
-						score++;
+						scoreFunction(1);
 						setFood();
 						break;
 					case EMPTY:
@@ -190,6 +189,7 @@ function Snake(initialDirection, startX, startY)
 				}
 				grid.set(SNAKE,nx,ny);
         		snake.insert(nx, ny);
+				return false;
 		}
 	};
 	
@@ -210,7 +210,7 @@ function setFood() {
 }
 
 //Game Objects
-var canvas, ctx, keystate, frames, score, gameover;
+var canvas, ctx, keystate;
 
 function main() {
     canvas = document.getElementById("snake");
@@ -237,70 +237,76 @@ function main() {
 
 function init() {
     
-    score = 0;
-    frames = 0;
-    gameover = false;
+    var score = 0;
+	function increaseScore(amount)
+	{
+		score += amount;
+	}
+	
+    var frames = 0;
+    var gameover = false;
 	
     grid = new Grid(EMPTY, COLS, ROWS);
     
     keystate = KEY_UP;
     
     var sp = {x: Math.floor(COLS/2), y: ROWS-1};
-    snake = new Snake(UP, sp.x, sp.y);
+    snake = new Snake(UP, sp.x, sp.y, grid);
     grid.set(SNAKE,sp.x,sp.y);
     
+	function loop()
+	{
+    	if (frames%5 == 0){
+			update();
+    		draw();
+			if(gameover)
+			{
+				end(score);
+				return;
+			}
+		}
+		frames++;
+   		window.requestAnimationFrame(loop,canvas);
+	}
+	
+	function update()
+	{
+		snake.updateDirection(keystate);
+		gameover = snake.move(increaseScore);
+	}
+		
+	function draw()
+	{
+		var tw = canvas.width/grid.getWidth();
+		var th = canvas.height/grid.getHeight();
+		
+		for (var x=0; x < grid.getWidth(); x++){
+			for (var y=0; y < grid.getHeight(); y++){
+				switch (grid.get(x,y)) {
+					case EMPTY:
+						ctx.fillStyle = "#000";
+						break;
+					case SNAKE:
+						ctx.fillStyle = "#00f";
+						break;
+					case FRUIT:
+						ctx.fillStyle = "#f00";
+						break;
+				}
+				ctx.fillRect(x*tw,y*th,tw,th);
+			}
+		}
+		ctx.font = "20px Times";
+		ctx.fillStyle = "#0f0";
+		ctx.fillText("Score: " + score, 10, canvas.height - 10);
+	}
+		
     setFood();
     
-    loop();
+    loop(score,frames, gameover);
 }
 
-function loop()
-{
-    if (frames%5 == 0){
-		update();
-    	draw();
-		if(gameover)
-		{
-			end();
-			return;
-		}
-	}
-	frames++;
-   	window.requestAnimationFrame(loop,canvas);
-}
-
-function update()
-{
-    snake.updateDirection(keystate);
-	gameover = snake.move();
-}
-
-function draw() {
-    var tw = canvas.width/grid.getWidth();
-    var th = canvas.height/grid.getHeight();
-    
-    for (var x=0; x < grid.getWidth(); x++){
-        for (var y=0; y < grid.getHeight(); y++){
-            switch (grid.get(x,y)) {
-                case EMPTY:
-                    ctx.fillStyle = "#000";
-                    break;
-                case SNAKE:
-                    ctx.fillStyle = "#00f";
-                    break;
-                case FRUIT:
-                    ctx.fillStyle = "#f00";
-                    break;
-            }
-            ctx.fillRect(x*tw,y*th,tw,th);
-        }
-    }
-    ctx.font = "20px Times";
-    ctx.fillStyle = "#0f0";
-    ctx.fillText("Score: " + score, 10, canvas.height - 10);
-}
-
-function end() {
+function end(score) {
     ctx.fillStyle = "#0f0";
     
     var endDiv = document.createElement("div");
