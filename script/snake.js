@@ -1,5 +1,6 @@
 //função que devolve valores aleatórios entre a(inclusive) e b(exclusive)
-function rnd(a, b) {
+function rnd(a, b)
+{
     return (Math.floor(Math.random() * (b - a) + a));
 }
 //Constantes
@@ -11,8 +12,6 @@ const LEFT=0,UP=1,RIGHT=2,DOWN=3;
 //Códigos das teclas
 const KEY_LEFT=37,KEY_UP=38,KEY_RIGHT=39,KEY_DOWN=40;
 
-//Grelha
-var grid, snake;
 //Construtor da grelha
 function Grid(initialValue, numCols, numRows)
 {
@@ -50,9 +49,20 @@ function Grid(initialValue, numCols, numRows)
 	{
 		return height;
 	}
+    
+    this.setFruit = function()
+    {
+        var empty = [];
+        for (var x=0; x < width; x++)
+            for (var y=0; y < height; y++)
+                if (this.get(x,y) == EMPTY)
+                    empty.push({x:x,y:y});
+        var randPos = empty[rnd(0,empty.length)];
+        this.set(FRUIT, randPos.x, randPos.y);
+    }
 }
 
-function Snake(initialDirection, startX, startY, grid)
+function Snake(initialDirection, startX, startY, board)
 {
 	var direction = initialDirection, queue = [], gameOver = false;
 	
@@ -150,45 +160,37 @@ function Snake(initialDirection, startX, startY, grid)
         }
 		
 		if ( nx < 0 )
-		{
-            nx = grid.getWidth() - 1;
-        }
-		else if (nx >= grid.getWidth())
-		{
+            nx = board.getWidth() - 1;
+		else if (nx >= board.getWidth())
             nx = 0;
-        }
 		else if (ny < 0)
-		{
-            ny = grid.getHeight() - 1;
-        }
-		else if (ny >= grid.getHeight())
-		{
+            ny = board.getHeight() - 1;
+		else if (ny >= board.getHeight())
             ny = 0;
-        }
 		
 		bigloop:
-		switch(grid.get(nx, ny))
+		switch(board.get(nx, ny))
 		{
 			case SNAKE:
             	return true;
 				break;
 			default:
-				switch(grid.get(nx,ny))
+				switch(board.get(nx,ny))
 				{
 					case FRUIT:
 						scoreFunction(1);
-						setFood();
+						board.setFruit();
 						break;
 					case EMPTY:
-						var tail = snake.remove();
-						grid.set(EMPTY,tail.x,tail.y);
+						var tail = this.remove();
+						board.set(EMPTY,tail.x,tail.y);
 						break;
 					default:
 						throw "Grid value isn't SNAKE, FRUIT, nor EMPTY!";
 						break bigloop;
 				}
-				grid.set(SNAKE,nx,ny);
-        		snake.insert(nx, ny);
+				board.set(SNAKE,nx,ny);
+        		this.insert(nx, ny);
 				return false;
 		}
 	};
@@ -196,23 +198,11 @@ function Snake(initialDirection, startX, startY, grid)
 	this.insert(startX,startY);
 }
 
-function setFood() {
-    var empty = [];
-    for (var x=0; x < grid.getWidth(); x++){
-        for (var y=0; y < grid.getHeight(); y++){
-            if (grid.get(x,y) == EMPTY){
-                empty.push({x:x,y:y});
-            }
-        }
-    }
-    var randPos = empty[rnd(0,empty.length)];
-    grid.set(FRUIT, randPos.x, randPos.y);
-}
-
 //Game Objects
 var canvas, ctx, keystate;
 
-function main() {
+function main()
+{
     canvas = document.getElementById("snake");
     ctx = canvas.getContext("2d");
     
@@ -235,7 +225,8 @@ function main() {
     init();
 }
 
-function init() {
+function init()
+{
     
     var score = 0;
 	function increaseScore(amount)
@@ -246,12 +237,12 @@ function init() {
     var frames = 0;
     var gameover = false;
 	
-    grid = new Grid(EMPTY, COLS, ROWS);
+    var grid = new Grid(EMPTY, COLS, ROWS);
     
     keystate = KEY_UP;
     
     var sp = {x: Math.floor(COLS/2), y: ROWS-1};
-    snake = new Snake(UP, sp.x, sp.y, grid);
+    var snake = new Snake(UP, sp.x, sp.y, grid);
     grid.set(SNAKE,sp.x,sp.y);
     
 	function loop()
@@ -280,9 +271,10 @@ function init() {
 		var tw = canvas.width/grid.getWidth();
 		var th = canvas.height/grid.getHeight();
 		
-		for (var x=0; x < grid.getWidth(); x++){
+		for (var x=0; x < grid.getWidth(); x++)
 			for (var y=0; y < grid.getHeight(); y++){
-				switch (grid.get(x,y)) {
+				switch (grid.get(x,y))
+                {
 					case EMPTY:
 						ctx.fillStyle = "#000";
 						break;
@@ -295,18 +287,18 @@ function init() {
 				}
 				ctx.fillRect(x*tw,y*th,tw,th);
 			}
-		}
 		ctx.font = "20px Times";
 		ctx.fillStyle = "#0f0";
 		ctx.fillText("Score: " + score, 10, canvas.height - 10);
 	}
 		
-    setFood();
+    grid.setFruit();
     
     loop(score,frames, gameover);
 }
 
-function end(score) {
+function end(score)
+{
     ctx.fillStyle = "#0f0";
     
     var endDiv = document.createElement("div");
@@ -334,7 +326,8 @@ function end(score) {
 	btnRestart.addEventListener("touchend",function(){restart(endDiv);});
 }
 
-function saveHighScore(highScore){
+function saveHighScore(highScore)
+{
     var highscores = getHighScores();
     highscores.push(highScore);
     highscores.sort(function(a,b){return b-a;});
@@ -342,7 +335,8 @@ function saveHighScore(highScore){
         window.localStorage["score"+i] = highscores[i];
     }
 }
-function getHighScores(){
+function getHighScores()
+{
     var scores = [];
     for(var i=0;i<10;i++){
         var item = window.localStorage.getItem("score"+i);
@@ -355,7 +349,8 @@ function getHighScores(){
     }
     return scores;
 }
-function displayHighScores(){
+function displayHighScores()
+{
 	var highscores = getHighScores();
 	var div = document.getElementById("highscore");
 	if (div == null)
@@ -376,7 +371,8 @@ function displayHighScores(){
 	}
 }
 
-function createElement(parent, element, id, text){
+function createElement(parent, element, id, text)
+{
 	var node = document.createElement(element);
 	if(!hasStrangeValues(id))
 		node.id = id;
@@ -386,7 +382,8 @@ function createElement(parent, element, id, text){
 	return node;
 }
 
-function hasStrangeValues(variable){
+function hasStrangeValues(variable)
+{
 	return (variable == null ||
 			variable == undefined ||
 			variable == NaN ||
@@ -396,7 +393,8 @@ function hasStrangeValues(variable){
 			variable.length == 0);
 }
 
-function restart (end) {
+function restart (end)
+{
     end.parentNode.removeChild(end);
     
     init();
