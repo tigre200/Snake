@@ -6,7 +6,7 @@ function rnd(a, b)
 //Constantes
 const COLS = 25,ROWS = 25;
 //Valores das Células
-const EMPTY=0,SNAKE=1,FRUIT=2;
+const EMPTY=0,SNAKE=1,FRUIT=2,COLLISION=3;
 //Direções
 const LEFT=0,UP=1,RIGHT=2,DOWN=3;
 //Códigos das teclas
@@ -66,22 +66,19 @@ function Snake(initialDirection, startX, startY, board)
 {
 	var direction = initialDirection, queue = [], gameOver = false;
 	
-	this.insert = function(x,y)
+	function insert(x,y)
 	{
 		queue.unshift({x:x,y:y});
+		board.set(SNAKE,x,y);
 	};
 	
-	this.remove = function()
+	function remove()
 	{
-		return queue.pop();
+		var last = queue.pop();
+		board.set(EMPTY,last.x, last.y);
 	};
 	
-	this.getNumberOfSegments = function()
-	{
-		return queue.length;
-	};
-	
-	this.getSegment = function(segment)
+	function getSegment(segment)
 	{
 		if( (segment != NaN) && (segment>=0) && (segment<queue.length) )
 			return queue[segment];
@@ -90,7 +87,7 @@ function Snake(initialDirection, startX, startY, board)
 			{
 				case "tail":
 				case "last":
-					return queue[this.getNumberOfSegments()-1];
+					return queue[queue.length-1];
 					break;
 				case "head":
 				case "first":
@@ -101,27 +98,7 @@ function Snake(initialDirection, startX, startY, board)
 			}
 	};
 	
-	this.getDirection = function()
-	{
-		return direction;
-	};
-	
-	this.setDirection = function(d)
-	{
-		switch(d)
-		{
-			case LEFT:
-			case UP:
-			case RIGHT:
-			case DOWN:
-				direction = d;
-				break;
-			default:
-				throw "Invalid direction";
-		}
-	};
-	
-	this.updateDirection = function(keyPressed)
+	function updateDirection(keyPressed)
 	{
 		if (keyPressed === KEY_LEFT && direction != RIGHT)
             direction = LEFT;
@@ -136,10 +113,12 @@ function Snake(initialDirection, startX, startY, board)
             			direction = RIGHT;
 	};
 	
-	this.move = function(scoreFunction)
+	this.move = function(objs)
 	{
-		var nx = this.getSegment("head").x,
-			ny = this.getSegment("head").y;
+		var nx = getSegment("head").x,
+			ny = getSegment("head").y;
+		
+		updateDirection(objs.key);
 		
 		switch (direction)
 		{
@@ -172,204 +151,203 @@ function Snake(initialDirection, startX, startY, board)
 		switch(board.get(nx, ny))
 		{
 			case SNAKE:
+				board.set(COLLISION,nx,ny);
             	return true;
 				break;
 			default:
 				switch(board.get(nx,ny))
 				{
 					case FRUIT:
-						scoreFunction(1);
+						objs.score++;
 						board.setFruit();
 						break;
 					case EMPTY:
-						var tail = this.remove();
-						board.set(EMPTY,tail.x,tail.y);
+						remove();
 						break;
 					default:
 						throw "Grid value isn't SNAKE, FRUIT, nor EMPTY!";
 						break bigloop;
 				}
-				board.set(SNAKE,nx,ny);
-        		this.insert(nx, ny);
+        		insert(nx, ny);
 				return false;
 		}
 	};
 	
-	this.insert(startX,startY);
+	insert(startX,startY);
 }
-
-//Game Objects
-var canvas, ctx, keystate;
 
 function main()
 {
-    canvas = document.getElementById("snake");
-    ctx = canvas.getContext("2d");
-    
-    displayHighScores();
-    
-    document.addEventListener("keydown", function(evt) {
-        if (evt.keyCode === KEY_UP    ||
-            evt.keyCode === KEY_RIGHT ||
-            evt.keyCode === KEY_LEFT  ||
-            evt.keyCode === KEY_DOWN){
-                keystate = evt.keyCode;
-        }
-    });
-    
-	$("#snake").on("swipeup",function(){keystate=KEY_UP;});
-	$("#snake").on("swipedown",function(){keystate=KEY_DOWN;});
-	$("#snake").on("swipeleft",function(){keystate=KEY_LEFT;});
-	$("#snake").on("swiperight",function(){keystate=KEY_RIGHT;});
+	var gameObjects = {canvas: document.getElementById("snake"),
+					   ctx: undefined};
+	gameObjects.ctx = gameObjects.canvas.getContext("2d");
 	
-    init();
+    highScore.displayHighScores();
+    
+    init(gameObjects);
 }
 
-function init()
+function init(gameObjects)
 {
-    
-    var score = 0;
-	function increaseScore(amount)
+	gameObjects.score = 0;
+	
+	gameObjects.frames = 0;
+	gameObjects.gameOver = false;
+	
+	gameObjects.grid = new Grid(EMPTY, COLS, ROWS);
+	
+	gameObjects.key = KEY_UP;
+	
+	function setupEventListeners()
 	{
-		score += amount;
+    	document.addEventListener("keydown", function(evt) {
+    	    if (evt.keyCode === KEY_UP    ||
+    	        evt.keyCode === KEY_RIGHT ||
+    	        evt.keyCode === KEY_LEFT  ||
+    	        evt.keyCode === KEY_DOWN){
+    	            gameObjects.key = evt.keyCode;
+    	    }
+    	});
+    	
+		$("#snake").on("swipeup",function(){gameObjects.key=KEY_UP;});
+		$("#snake").on("swipedown",function(){gameObjects.key=KEY_DOWN;});
+		$("#snake").on("swipeleft",function(){gameObjects.key=KEY_LEFT;});
+		$("#snake").on("swiperight",function(){gameObjects.key=KEY_RIGHT;});
 	}
+	setupEventListeners();
 	
-    var frames = 0;
-    var gameover = false;
+	var sp = {x: Math.floor(COLS/2), y: ROWS-1};
+	gameObjects.snake = new Snake(UP, sp.x, sp.y, gameObjects.grid);
+	gameObjects.grid.set(SNAKE,sp.x,sp.y);
 	
-    var grid = new Grid(EMPTY, COLS, ROWS);
-    
-    keystate = KEY_UP;
-    
-    var sp = {x: Math.floor(COLS/2), y: ROWS-1};
-    var snake = new Snake(UP, sp.x, sp.y, grid);
-    grid.set(SNAKE,sp.x,sp.y);
-    
 	function loop()
 	{
-    	if (frames%5 == 0){
+		if (gameObjects.frames%5 == 0)
+		{
 			update();
-    		draw();
-			if(gameover)
-			{
-				end(score);
-				return;
-			}
+			draw();
 		}
-		frames++;
-   		window.requestAnimationFrame(loop,canvas);
+		if(gameObjects.gameOver)
+			end(gameObjects);
+		else
+		{
+			gameObjects.frames++;
+			window.requestAnimationFrame(loop,gameObjects.canvas);
+		}
 	}
 	
 	function update()
 	{
-		snake.updateDirection(keystate);
-		gameover = snake.move(increaseScore);
+		gameObjects.gameOver = gameObjects.snake.move(gameObjects);
 	}
-		
+	
 	function draw()
 	{
-		var tw = canvas.width/grid.getWidth();
-		var th = canvas.height/grid.getHeight();
+		var tw = gameObjects.canvas.width/gameObjects.grid.getWidth();
+		var th = gameObjects.canvas.height/gameObjects.grid.getHeight();
 		
-		for (var x=0; x < grid.getWidth(); x++)
-			for (var y=0; y < grid.getHeight(); y++){
-				switch (grid.get(x,y))
-                {
+		for (var x=0; x < gameObjects.grid.getWidth(); x++)
+			for (var y=0; y < gameObjects.grid.getHeight(); y++){
+				switch (gameObjects.grid.get(x,y))
+				{
 					case EMPTY:
-						ctx.fillStyle = "#000";
+						gameObjects.ctx.fillStyle = "#000";
 						break;
 					case SNAKE:
-						ctx.fillStyle = "#00f";
+						gameObjects.ctx.fillStyle = "#00f";
 						break;
 					case FRUIT:
-						ctx.fillStyle = "#f00";
+						gameObjects.ctx.fillStyle = "#f00";
 						break;
+					case COLLISION:
+						gameObjects.ctx.fillStyle = "orange";
 				}
-				ctx.fillRect(x*tw,y*th,tw,th);
+				gameObjects.ctx.fillRect(x*tw,y*th,tw,th);
 			}
-		ctx.font = "20px Times";
-		ctx.fillStyle = "#0f0";
-		ctx.fillText("Score: " + score, 10, canvas.height - 10);
+		gameObjects.ctx.font = "20px Times";
+		gameObjects.ctx.fillStyle = "#0f0";
+		gameObjects.ctx.fillText("Score: " + gameObjects.score, 10, gameObjects.canvas.height - 10);
 	}
-		
-    grid.setFruit();
-    
-    loop(score,frames, gameover);
-}
-
-function end(score)
-{
-    ctx.fillStyle = "#0f0";
-    
-    var endDiv = document.createElement("div");
-    endDiv.id = "end";
-    
-    var text = document.createElement("h2");
-    text.id = "endgametext";
-    text.innerHTML = "Game Over<br/>Your score was: <br/>" + score;
-    endDiv.appendChild(text);
-    
-    var btnRestart = document.createElement("div");
-    btnRestart.id = "restart";
-    endDiv.appendChild(btnRestart);
-    
-    var hRestart = document.createElement("h3");
-    hRestart.innerHTML = "Retry";
-    btnRestart.appendChild(hRestart);
-    
-    document.body.appendChild(endDiv);
-    
-    saveHighScore(score);
-	displayHighScores();
-    
-    btnRestart.addEventListener("click", function () {restart(endDiv) ;});
-	btnRestart.addEventListener("touchend",function(){restart(endDiv);});
-}
-
-function saveHighScore(highScore)
-{
-    var highscores = getHighScores();
-    highscores.push(highScore);
-    highscores.sort(function(a,b){return b-a;});
-    for(var i=0;i<10;i++){
-        window.localStorage["score"+i] = highscores[i];
-    }
-}
-function getHighScores()
-{
-    var scores = [];
-    for(var i=0;i<10;i++){
-        var item = window.localStorage.getItem("score"+i);
-        if (!hasStrangeValues(item)) {
-            scores.push(parseInt(item));
-        }else{
-            scores.push(-1);
-			window.localStorage.setItem("score"+i,-1);
-        }
-    }
-    return scores;
-}
-function displayHighScores()
-{
-	var highscores = getHighScores();
-	var div = document.getElementById("highscore");
-	if (div == null)
-	{
-		div = createElement(document.body,"div","highscore");
-		var title = createElement(div,"h2",null,"High Scores");
-	}
-	else
-		if (div.lastChild.nodeName.toLowerCase() == "ol")
-			div.removeChild(div.lastChild);
 	
-	var highscoresList = createElement(div,"ol");
-	for (var i = 0; i < highscores.length; i++)
-	{
-		var s = highscores[i];
-		if(s!=-1)
-			createElement(highscoresList,"li",null,s.toString());
-	}
+	gameObjects.grid.setFruit();
+	
+	loop();
 }
+
+function end(gameObjects)
+{
+	var endDiv = document.createElement("div");
+	endDiv.id = "end";
+	
+	var text = document.createElement("h2");
+	text.id = "endgametext";
+	text.innerHTML = "Game Over<br/>Your score was: <br/>" + gameObjects.score;
+	endDiv.appendChild(text);
+	
+	var btnRestart = document.createElement("div");
+	btnRestart.id = "restart";
+	endDiv.appendChild(btnRestart);
+	
+	var hRestart = document.createElement("h3");
+	hRestart.innerHTML = "Retry";
+	btnRestart.appendChild(hRestart);
+	
+	document.body.appendChild(endDiv);
+	
+	highScore.saveHighScore(gameObjects.score);
+	highScore.displayHighScores();
+	
+	btnRestart.addEventListener("click", function () {restart(endDiv,gameObjects) ;});
+	btnRestart.addEventListener("touchend",function(){restart(endDiv,gameObjects);});
+}
+
+var highScore = 
+{
+	getHighScores: function ()
+		{
+			var scores = [];
+			for(var i=0;i<10;i++){
+				var item = window.localStorage.getItem("score"+i);
+				if (!hasStrangeValues(item)) {
+					scores.push(parseInt(item));
+				}else{
+					scores.push(-1);
+					window.localStorage.setItem("score"+i,-1);
+				}
+			}
+			return scores;
+		},
+	saveHighScore: function (highScore)
+		{
+			var highscores = this.getHighScores();
+			highscores.push(highScore);
+			highscores.sort(function(a,b){return b-a;});
+			for(var i=0;i<10;i++){
+				window.localStorage["score"+i] = highscores[i];
+			}
+		},
+	displayHighScores: function ()
+		{
+			var highscores = this.getHighScores();
+			var div = document.getElementById("highscore");
+			if (div == null)
+			{
+				div = createElement(document.body,"div","highscore");
+				var title = createElement(div,"h2",null,"High Scores");
+			}
+			else
+				if (div.lastChild.nodeName.toLowerCase() == "ol")
+					div.removeChild(div.lastChild);
+			
+			var highscoresList = createElement(div,"ol");
+			for (var i = 0; i < highscores.length; i++)
+			{
+				var s = highscores[i];
+				if(s!=-1)
+					createElement(highscoresList,"li",null,s.toString());
+			}
+		}
+};
 
 function createElement(parent, element, id, text)
 {
@@ -393,11 +371,11 @@ function hasStrangeValues(variable)
 			variable.length == 0);
 }
 
-function restart (end)
+function restart (end,gameObjects)
 {
     end.parentNode.removeChild(end);
     
-    init();
+    init(gameObjects);
 }
 
 main();
