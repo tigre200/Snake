@@ -208,11 +208,6 @@ function init(gameObjects)
     	            gameObjects.key = evt.keyCode;
     	    }
     	});
-    	
-		$("#snake").on("swipeup",function(){gameObjects.key=KEY_UP;});
-		$("#snake").on("swipedown",function(){gameObjects.key=KEY_DOWN;});
-		$("#snake").on("swipeleft",function(){gameObjects.key=KEY_LEFT;});
-		$("#snake").on("swiperight",function(){gameObjects.key=KEY_RIGHT;});
 	}
 	setupEventListeners();
 	
@@ -291,12 +286,10 @@ function end(gameObjects)
 	var hRestart = document.createElement("h3");
 	hRestart.innerHTML = "Retry";
 	btnRestart.appendChild(hRestart);
-	
-	document.body.appendChild(endDiv);
-	
+
 	highScore.saveHighScore(gameObjects.score);
 	highScore.displayHighScores();
-	
+	document.body.insertBefore(endDiv,document.getElementById("highscore"));
 	btnRestart.addEventListener("click", function () {restart(endDiv,gameObjects) ;});
 	btnRestart.addEventListener("touchend",function(){restart(endDiv,gameObjects);});
 }
